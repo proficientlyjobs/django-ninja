@@ -247,13 +247,14 @@ class OpenAPISchema(dict):
         self,
         models: TModels,
         mode: JsonSchemaMode = "validation",
+        by_alias: bool = True
     ) -> Tuple[DictStrAny, str]:
         # We have File and Form or Body, so we need to use multipart (File)
         content_type = BODY_CONTENT_TYPES["file"]
 
         # get the various schemas
         result = merge_schemas([
-            self._create_schema_from_model(model, remove_level=False)[0]
+            self._create_schema_from_model(model, remove_level=False, by_alias=by_alias)[0]
             for model in models
         ])
         result["title"] = "MultiPartBodyParams"
@@ -276,10 +277,11 @@ class OpenAPISchema(dict):
                 model,
                 remove_level=model.__ninja_param_source__ == "body",
                 mode="validation",
+                by_alias=operation.by_alias,
             )
         else:
             schema, content_type = self._create_multipart_schema_from_models(
-                models, mode="validation"
+                models, mode="validation", by_alias=operation.by_alias,
             )
             required = True
 
